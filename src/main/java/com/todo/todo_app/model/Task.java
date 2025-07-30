@@ -23,7 +23,9 @@ public class Task {
 
     private LocalDateTime createdAt;
 
+
     private String category;
+
 
     @PrePersist
     protected void onCreate() {

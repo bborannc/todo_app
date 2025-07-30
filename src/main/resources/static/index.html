@@ -67,7 +67,7 @@
 
     <form id="task-form">
       <input type="text" id="title" placeholder="Başlık" required />
-      <input type="text" id="category" placeholder="Kategori (ör. İş, Kişisel)" required />
+      <input type="text" id="category" placeholder="Kategori (ör. İş, Kişisel)" />
       <input type="text" id="description" placeholder="Açıklama (isteğe bağlı)" />
       <button type="submit">Yeni Görev Ekle</button>
     </form>
@@ -268,34 +268,42 @@
     });
 
     // Yeni görev ekleme formu
-    taskForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const title = titleInput.value.trim();
-      const description = document.getElementById('description').value.trim();
-      const category = categoryInput.value.trim();
+taskForm.addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const title = titleInput.value.trim();
+  const description = document.getElementById('description').value.trim();
+  const category = categoryInput.value.trim();
 
-      if (!title || !category) {
-        alert('Başlık ve kategori alanları zorunludur!');
-        return;
-      }
-      const newTask = { title, description, completed: false, category };
-      try {
-        const res = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(newTask)
-        });
-        if(res.ok){
-          this.reset();
-          fetchTasks();
-        } else {
-          alert('Görev eklenirken bir hata oluştu.');
-        }
-      } catch (error) {
-        alert('Sunucuya bağlanırken hata oluştu.');
-        console.error(error);
-      }
+  if (!title) {
+    alert('Başlık alanı zorunludur!');
+    return;
+  }
+
+  const newTask = {
+    title,
+    description: description || null,
+    completed: false,
+    category: category !== '' ? category : null
+  };
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTask)
     });
+
+    if (res.ok) {
+      this.reset();
+      fetchTasks();
+    } else {
+      alert('Görev eklenirken bir hata oluştu.');
+    }
+  } catch (error) {
+    alert('Sunucuya bağlanırken hata oluştu.');
+    console.error(error);
+  }
+});
 
     fetchTasks();
   </script>

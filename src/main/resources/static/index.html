@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Todo App - Tam Sürüm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4a90e2; --success-color: #50e3c2; --danger-color: #e24a4a; --light-gray: #f4f7f9; --medium-gray: #dfe6e9; --dark-gray: #636e72; --text-color: #2d3436; --white-color: #ffffff; --shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    html { scroll-behavior: smooth; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Roboto', sans-serif; background-color: var(--light-gray); color: var(--text-color); display: flex; justify-content: center; padding: 20px; min-height: 100vh; }
+    .container { max-width: 700px; width: 100%; background: var(--white-color); padding: 30px; border-radius: 12px; box-shadow: var(--shadow); }
+    h1 { text-align: center; color: var(--primary-color); margin-bottom: 25px; }
+    #task-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+    #task-form input[type="text"] { padding: 12px 15px; font-size: 1rem; border: 1px solid var(--medium-gray); border-radius: 8px; transition: border-color 0.3s, box-shadow 0.3s; }
+    #task-form input[type="text"]#description { grid-column: span 2; }
+    #task-form input[type="text"]:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2); }
+    #task-form button { grid-column: span 2; padding: 12px 16px; font-size: 1.1rem; font-weight: 500; background-color: var(--primary-color); color: var(--white-color); border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; }
+    #task-form button:hover { background-color: #3a7bc8; }
+    ul { list-style: none; }
+    .category-section { margin-bottom: 30px; }
+    .category-section h3 { padding-bottom: 8px; border-bottom: 2px solid var(--primary-color); margin-bottom: 15px; color: var(--primary-color); font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .add-to-category-btn { background-color: var(--primary-color); color: white; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 18px; font-weight: bold; line-height: 26px; text-align: center; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
+    .add-to-category-btn:hover { background-color: #3a7bc8; transform: scale(1.1); }
+    li.task-item { padding: 15px; border: 1px solid var(--medium-gray); border-radius: 8px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; transition: background-color 0.2s, box-shadow 0.2s; }
+    li.task-item:hover { background-color: #fafafa; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    li.completed .task-text { text-decoration: line-through; color: var(--dark-gray); }
+    .task-checkbox { flex-shrink: 0; width: 18px; height: 18px; cursor: pointer; }
+    .task-text { flex-grow: 1; }
+    .task-title { font-weight: 500; }
+    .task-description { font-size: 0.9em; color: var(--dark-gray); margin-top: 4px; }
+    .task-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .task-actions button { padding: 6px 12px; font-size: 0.9rem; border: none; border-radius: 5px; cursor: pointer; color: white; transition: opacity 0.3s; }
+    .task-actions button:hover { opacity: 0.8; }
+    .edit-btn { background-color: var(--dark-gray); }
+    .delete-btn { background-color: var(--danger-color); }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 15px; }
+    .modal-content { background-color: var(--white-color); padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 5px 20px rgba(0,0,0,0.25); position: relative; }
+    .modal-content h2 { margin-bottom: 20px; color: var(--primary-color); }
+    .close-btn { color: #aaa; position: absolute; top: 15px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close-btn:hover, .close-btn:focus { color: black; text-decoration: none; }
+    #edit-form { display: flex; flex-direction: column; gap: 15px; }
+    #edit-form label { font-weight: 500; margin-bottom: -10px; }
+    #edit-form input { padding: 12px 15px; font-size: 1rem; border: 1px solid var(--medium-gray); border-radius: 8px; }
+    #edit-form button { padding: 12px; font-size: 1.1rem; font-weight: 500; background-color: var(--success-color); color: var(--white-color); border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; }
+    #edit-form button:hover { background-color: #48cfa9; }
+    @media (max-width: 768px) {
+        body { padding: 10px; } .container { padding: 20px; } h1 { font-size: 1.8rem; }
+        #task-form { grid-template-columns: 1fr; }
+        #task-form input[type="text"]#description, #task-form button { grid-column: span 1; }
+        li.task-item { flex-wrap: wrap; gap: 12px; } .task-actions { margin-left: auto; }
+    }
+    @media (max-width: 480px) {
+        h1 { font-size: 1.6rem; } li.task-item { flex-direction: column; align-items: flex-start; }
+        .task-actions { width: 100%; display: flex; justify-content: flex-end; } .modal-content { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Görev Listesi</h1>
+
+    <form id="task-form">
+      <input type="text" id="title" placeholder="Başlık" required />
+      <input type="text" id="category" placeholder="Kategori (ör. İş, Kişisel)" required />
+      <input type="text" id="description" placeholder="Açıklama (isteğe bağlı)" />
+      <button type="submit">Yeni Görev Ekle</button>
+    </form>
+
+    <div id="task-container"></div>
+  </div>
+  
+  <!-- DÜZELTME: Düzenleme modalının HTML içeriği tam olarak eklendi -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <h2>Görevi Düzenle</h2>
+      <form id="edit-form">
+        <input type="hidden" id="edit-task-id">
+        <label for="edit-title">Başlık:</label>
+        <input type="text" id="edit-title" required>
+        <label for="edit-description">Açıklama:</label>
+        <input type="text" id="edit-description">
+        <label for="edit-category">Kategori:</label>
+        <input type="text" id="edit-category" required>
+        <button type="submit">Değişiklikleri Kaydet</button>
+      </form>
+    </div>
+  </div>
+
+
+  <script>
+    const apiUrl = 'http://localhost:8080/tasks';
+    const taskForm = document.getElementById('task-form');
+    const taskContainer = document.getElementById('task-container');
+    const titleInput = document.getElementById('title');
+    const categoryInput = document.getElementById('category');
+    
+    // Düzenleme Modalı Elemanları
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-form');
+    const closeModalBtn = document.querySelector('.close-btn');
+    const editTaskIdInput = document.getElementById('edit-task-id');
+    const editTitleInput = document.getElementById('edit-title');
+    const editDescriptionInput = document.getElementById('edit-description');
+    const editCategoryInput = document.getElementById('edit-category');
+
+    function prefillCategoryAndFocus(categoryName) {
+        categoryInput.value = categoryName;
+        titleInput.focus();
+        taskForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function fetchTasks() {
+      try {
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error('Sunucudan veri alınamadı.');
+        const tasks = await res.json();
+        
+        taskContainer.innerHTML = '';
+
+        const grouped = tasks.reduce((acc, task) => {
+          const category = task.category || 'Genel';
+          if (!acc[category]) acc[category] = [];
+          acc[category].push(task);
+          return acc;
+        }, {});
+
+        for (const [category, tasks] of Object.entries(grouped)) {
+          const section = document.createElement('div');
+          section.className = 'category-section';
+
+          const h3 = document.createElement('h3');
+          const categoryTitleSpan = document.createElement('span');
+          categoryTitleSpan.textContent = category;
+          const addBtn = document.createElement('button');
+          addBtn.textContent = '+';
+          addBtn.className = 'add-to-category-btn';
+          addBtn.title = `'${category}' kategorisine yeni görev ekle`;
+          addBtn.addEventListener('click', () => prefillCategoryAndFocus(category));
+          h3.appendChild(categoryTitleSpan);
+          h3.appendChild(addBtn);
+          section.appendChild(h3);
+
+          const ul = document.createElement('ul');
+          tasks.forEach(task => {
+            const li = document.createElement('li');
+            li.className = 'task-item';
+            if (task.completed) li.classList.add('completed');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = task.completed;
+            checkbox.className = 'task-checkbox';
+            checkbox.addEventListener('change', () => toggleTaskComplete(task));
+            const textDiv = document.createElement('div');
+            textDiv.className = 'task-text';
+            const titleSpan = document.createElement('div');
+            titleSpan.className = 'task-title';
+            titleSpan.textContent = task.title;
+            textDiv.appendChild(titleSpan);
+            if(task.description){
+                const descSpan = document.createElement('div');
+                descSpan.className = 'task-description';
+                descSpan.textContent = task.description;
+                textDiv.appendChild(descSpan);
+            }
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'task-actions';
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Düzenle';
+            editBtn.className = 'edit-btn';
+            editBtn.addEventListener('click', () => openEditModal(task)); // Bu fonksiyon artık çalışacak
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Sil';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.addEventListener('click', () => deleteTask(task));
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(deleteBtn);
+            li.appendChild(checkbox);
+            li.appendChild(textDiv);
+            li.appendChild(actionsDiv);
+            ul.appendChild(li);
+          });
+          section.appendChild(ul);
+          taskContainer.appendChild(section);
+        }
+      } catch (error) {
+        console.error('Görevler getirilirken hata:', error);
+        taskContainer.innerHTML = '<p style="color: red; text-align: center;">Görevler yüklenirken bir hata oluştu.</p>';
+      }
+    }
+
+    async function toggleTaskComplete(task) {
+        try {
+            await fetch(`${apiUrl}/${task.id}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({...task, completed: !task.completed}) });
+            fetchTasks();
+        } catch (error) { console.error('Görev güncellenirken hata:', error); alert('Görev durumu güncellenemedi.'); }
+    }
+
+    async function deleteTask(task) {
+        if(confirm(`"${task.title}" görevini silmek istediğinize emin misiniz?`)){
+            try { await fetch(`${apiUrl}/${task.id}`, { method: 'DELETE' }); fetchTasks(); } 
+            catch(error) { console.error('Görev silinirken hata:', error); alert('Görev silinemedi.'); }
+        }
+    }
+    
+    // Düzenleme Fonksiyonları
+    function openEditModal(task) {
+      editTaskIdInput.value = task.id;
+      editTitleInput.value = task.title;
+      editDescriptionInput.value = task.description || '';
+      editCategoryInput.value = task.category;
+      editModal.style.display = 'flex';
+    }
+    
+    function closeEditModal() {
+      editModal.style.display = 'none';
+    }
+    
+    closeModalBtn.addEventListener('click', closeEditModal);
+    window.addEventListener('click', (e) => {
+      if (e.target == editModal) {
+        closeEditModal();
+      }
+    });
+
+    // DÜZELTME: Düzenleme formunun submit event listener'ı tam olarak eklendi ve iyileştirildi.
+    editForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const taskId = editTaskIdInput.value;
+      const updatedData = {
+        title: editTitleInput.value.trim(),
+        description: editDescriptionInput.value.trim(),
+        category: editCategoryInput.value.trim(),
+      };
+      
+      try {
+        // İYİLEŞTİRME: Düzenleme yaparken 'completed' durumunu kaybetmemek için önce mevcut görevi alıyoruz.
+        const originalTaskRes = await fetch(`${apiUrl}/${taskId}`);
+        if (!originalTaskRes.ok) throw new Error('Mevcut görev verisi alınamadı.');
+        const originalTask = await originalTaskRes.json();
+
+        // Mevcut görev verisi ile yeni veriyi birleştiriyoruz.
+        const taskToSend = { ...originalTask, ...updatedData };
+
+        const res = await fetch(`${apiUrl}/${taskId}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(taskToSend)
+        });
+
+        if (res.ok) {
+          closeEditModal();
+          fetchTasks();
+        } else {
+          alert('Görev güncellenirken hata oluştu.');
+        }
+      } catch (error) {
+        alert('Sunucuya bağlanırken hata oluştu.');
+        console.error(error);
+      }
+    });
+
+    // Yeni görev ekleme formu
+    taskForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const title = titleInput.value.trim();
+      const description = document.getElementById('description').value.trim();
+      const category = categoryInput.value.trim();
+
+      if (!title || !category) {
+        alert('Başlık ve kategori alanları zorunludur!');
+        return;
+      }
+      const newTask = { title, description, completed: false, category };
+      try {
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(newTask)
+        });
+        if(res.ok){
+          this.reset();
+          fetchTasks();
+        } else {
+          alert('Görev eklenirken bir hata oluştu.');
+        }
+      } catch (error) {
+        alert('Sunucuya bağlanırken hata oluştu.');
+        console.error(error);
+      }
+    });
+
+    fetchTasks();
+  </script>
+</body>
+</html>
